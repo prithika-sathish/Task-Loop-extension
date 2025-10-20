@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskLoop</title>
+    <link rel="stylesheet" href="styles/popup.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="logo">TaskLoop</h1>
+            <div class="header-actions">
+                <button id="calendarBtn" class="icon-btn" title="Calendar View">📅</button>
+                <button id="settingsBtn" class="icon-btn" title="Settings">⚙️</button>
+            </div>
+        </header>
+
+        <!-- Current Task Display -->
+        <div id="currentTaskSection" class="current-task hidden">
+            <div class="task-card running">
+                <div class="task-info">
+                    <h3 id="currentTaskName">Current Task</h3>
+                    <div class="task-meta">
+                        <span id="currentTaskTime">25:00</span>
+                        <span class="separator">•</span>
+                        <span id="currentTaskDuration">30 min</span>
+                    </div>
+                </div>
+                <div class="task-actions">
+                    <button id="pauseBtn" class="btn btn-secondary">⏸️</button>
+                    <button id="completeBtn" class="btn btn-success">✓</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Task Form -->
+        <div id="addTaskSection" class="add-task-section">
+            <h2>Add New Task</h2>
+            <form id="addTaskForm">
+                <div class="form-group">
+                    <label for="taskName">Task Name</label>
+                    <input type="text" id="taskName" placeholder="e.g., DSA Practice" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="taskDuration">Duration</label>
+                        <select id="taskDuration" required>
+                            <option value="15">15 min</option>
+                            <option value="30" selected>30 min</option>
+                            <option value="45">45 min</option>
+                            <option value="60">1 hr</option>
+                            <option value="90">1.5 hr</option>
+                            <option value="120">2 hr</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="startTime">Start Time (Optional)</label>
+                        <input type="time" id="startTime">
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Add Task</button>
+            </form>
+        </div>
+
+        <!-- Today's Tasks -->
+        <div id="tasksSection" class="tasks-section">
+            <div class="section-header">
+                <h2>Today's Tasks</h2>
+                <button id="toggleView" class="btn btn-outline">History</button>
+            </div>
+            
+            <div id="tasksList" class="tasks-list">
+                <!-- Tasks will be dynamically populated -->
+            </div>
+            
+            <div id="emptyState" class="empty-state">
+                <p>No tasks scheduled for today</p>
+                <p class="subtitle">Add your first task above to get started!</p>
+            </div>
+        </div>
+
+        <!-- Calendar View (Hidden by default) -->
+        <div id="calendarSection" class="calendar-section hidden">
+            <div class="calendar-header">
+                <button id="prevMonth" class="btn btn-outline">‹</button>
+                <h3 id="currentMonth">December 2024</h3>
+                <button id="nextMonth" class="btn btn-outline">›</button>
+            </div>
+            <div id="calendarGrid" class="calendar-grid">
+                <!-- Calendar will be dynamically populated -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Load local DB layer first (handles Supabase REST) -->
+    <script src="scripts/database.js"></script>
+    <script src="scripts/popup.js"></script>
+</body>
+</html>

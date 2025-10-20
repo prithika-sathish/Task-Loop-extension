@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskLoop Settings</title>
+    <link rel="stylesheet" href="styles/options.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>TaskLoop Settings</h1>
+            <p class="subtitle">Customize your task tracking experience</p>
+        </header>
+
+        <main class="main-content">
+            <!-- Badge Settings -->
+            <section class="settings-section">
+                <h2>Badge Display</h2>
+                <div class="setting-item">
+                    <label for="badgeFormat">Badge Format</label>
+                    <select id="badgeFormat">
+                        <option value="time">Show remaining time (e.g., "25")</option>
+                        <option value="name">Show task name (e.g., "DSA")</option>
+                        <option value="both">Alternate between time and name</option>
+                    </select>
+                    <p class="setting-description">Choose what to display in the extension badge</p>
+                </div>
+
+                <div class="setting-item">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="showBadgeWhenIdle">
+                        <span class="checkmark"></span>
+                        Show badge when no task is running
+                    </label>
+                    <p class="setting-description">Display a default badge even when not tracking tasks</p>
+                </div>
+            </section>
+
+            <!-- Notifications -->
+            <section class="settings-section">
+                <h2>Notifications</h2>
+                <div class="setting-item">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="enableNotifications">
+                        <span class="checkmark"></span>
+                        Enable notifications
+                    </label>
+                    <p class="setting-description">Get notified when tasks complete or time runs out</p>
+                </div>
+
+                <div class="setting-item">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="notifyBeforeEnd">
+                        <span class="checkmark"></span>
+                        Notify 5 minutes before task ends
+                    </label>
+                    <p class="setting-description">Get a warning before your task time is up</p>
+                </div>
+
+                <div class="setting-item">
+                    <label for="notificationSound">Notification Sound</label>
+                    <select id="notificationSound">
+                        <option value="default">Default</option>
+                        <option value="chime">Chime</option>
+                        <option value="bell">Bell</option>
+                        <option value="none">Silent</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- Task Management -->
+            <section class="settings-section">
+                <h2>Task Management</h2>
+                <div class="setting-item">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="autoStartNext">
+                        <span class="checkmark"></span>
+                        Auto-start next scheduled task
+                    </label>
+                    <p class="setting-description">Automatically begin the next task when current one completes</p>
+                </div>
+
+                <div class="setting-item">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="allowOvertime">
+                        <span class="checkmark"></span>
+                        Allow tasks to run overtime
+                    </label>
+                    <p class="setting-description">Continue tracking even after planned duration ends</p>
+                </div>
+
+                <div class="setting-item">
+                    <label for="defaultDuration">Default Task Duration</label>
+                    <select id="defaultDuration">
+                        <option value="15">15 minutes</option>
+                        <option value="30">30 minutes</option>
+                        <option value="45">45 minutes</option>
+                        <option value="60">1 hour</option>
+                        <option value="90">1.5 hours</option>
+                        <option value="120">2 hours</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- Data Management -->
+            <section class="settings-section">
+                <h2>Data Management</h2>
+                <div class="setting-item">
+                    <label for="historyRetention">Keep task history for</label>
+                    <select id="historyRetention">
+                        <option value="7">1 week</option>
+                        <option value="30">1 month</option>
+                        <option value="90">3 months</option>
+                        <option value="365">1 year</option>
+                        <option value="0">Forever</option>
+                    </select>
+                </div>
+
+                <div class="setting-item">
+                    <div class="button-group">
+                        <button id="exportData" class="btn btn-outline">Export Data</button>
+                        <button id="importData" class="btn btn-outline">Import Data</button>
+                        <button id="clearData" class="btn btn-danger">Clear All Data</button>
+                    </div>
+                    <p class="setting-description">Backup, restore, or reset your task data</p>
+                </div>
+            </section>
+
+            <!-- Statistics -->
+            <section class="settings-section">
+                <h2>Statistics</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3 id="totalTasks">0</h3>
+                        <p>Total Tasks Completed</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="totalTime">0h</h3>
+                        <p>Total Time Tracked</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="avgAccuracy">0%</h3>
+                        <p>Average Time Accuracy</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="streakDays">0</h3>
+                        <p>Current Streak (Days)</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <div class="save-status" id="saveStatus">Settings saved automatically</div>
+            <button id="resetSettings" class="btn btn-outline">Reset to Defaults</button>
+        </footer>
+    </div>
+
+    <input type="file" id="fileInput" accept=".json" style="display: none;">
+    <script src="scripts/options.js"></script>
+</body>
+</html>

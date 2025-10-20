@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "TaskLoop - Task Scheduler & Tracker",
+  "version": "1.0.0",
+  "description": "A lightweight task scheduling and tracking extension with countdown timers and productivity insights.",
+  
+  "permissions": [
+    "storage",
+    "activeTab",
+    "alarms"
+  ],
+
+  "host_permissions": [
+    "https://vyicyfnntcseipjewxcd.supabase.co/*"
+  ],
+  
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "TaskLoop - Task Tracker"
+    
+  },
+  
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+
+  "options_page": "options.html"
+}
