@@ -2,11 +2,15 @@
 const SUPABASE_URL = 'https://vyicyfnntcseipjewxcd.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5aWN5Zm5udGNzZWlwamV3eGNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA2ODg1MDcsImV4cCI6MjA3NjI2NDUwN30.MGjlyybbPX-lZvpWfRv7i7g-uURljNlltKUe5PFLHpM';
 const SUPABASE_TABLE = 'Tasks';
+const SUPABASE_STREAKS_TABLE = 'Streaks';
+const SUPABASE_PENDING_TABLE = 'PendingTasks';
 const SUPABASE_REST = `${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}`;
+const SUPABASE_STREAKS_REST = `${SUPABASE_URL}/rest/v1/${SUPABASE_STREAKS_TABLE}`;
+const SUPABASE_PENDING_REST = `${SUPABASE_URL}/rest/v1/${SUPABASE_PENDING_TABLE}`;
 
 // Simple fetch wrapper for Supabase REST
-async function supabaseFetch(path = '', opts = {}) {
-    const url = path.startsWith('http') ? path : `${SUPABASE_REST}${path}`;
+async function supabaseFetch(path = '', opts = {}, baseUrl = SUPABASE_REST) {
+    const url = path.startsWith('http') ? path : `${baseUrl}${path}`;
     const headers = {
         apikey: SUPABASE_ANON_KEY,
         Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
@@ -74,6 +78,108 @@ async function deleteTaskFromSupabase(supabaseId) {
     }
 }
 
+// Streaks Supabase functions
+async function addStreakToSupabase(streak) {
+    try {
+        const payload = {
+            task_name: streak.taskName,
+            current_streak: streak.currentStreak || 0,
+            last_completed_date: streak.lastCompletedDate || null
+        };
+        const inserted = await supabaseFetch('', { 
+            method: 'POST', 
+            body: JSON.stringify(payload),
+            headers: { Prefer: 'return=representation' }
+        }, SUPABASE_STREAKS_REST);
+        return Array.isArray(inserted) ? inserted[0] : inserted;
+    } catch (err) {
+        console.warn('Supabase streak insert failed', err);
+        return null;
+    }
+}
+
+async function updateStreakInSupabase(supabaseId, updates) {
+    if (!supabaseId) return null;
+    try {
+        const payload = {};
+        if (updates.taskName !== undefined) payload.task_name = updates.taskName;
+        if (updates.currentStreak !== undefined) payload.current_streak = updates.currentStreak;
+        if (updates.lastCompletedDate !== undefined) payload.last_completed_date = updates.lastCompletedDate;
+        
+        if (Object.keys(payload).length === 0) return null;
+        
+        const updated = await supabaseFetch(`?id=eq.${supabaseId}`, { 
+            method: 'PATCH', 
+            body: JSON.stringify(payload) 
+        }, SUPABASE_STREAKS_REST);
+        return Array.isArray(updated) ? updated[0] : updated;
+    } catch (err) {
+        console.warn('Supabase streak update failed', err);
+        return null;
+    }
+}
+
+async function deleteStreakFromSupabase(supabaseId) {
+    if (!supabaseId) return false;
+    try {
+        await supabaseFetch(`?id=eq.${supabaseId}`, { method: 'DELETE' }, SUPABASE_STREAKS_REST);
+        return true;
+    } catch (err) {
+        console.warn('Supabase streak delete failed', err);
+        return false;
+    }
+}
+
+// Pending Tasks Supabase functions
+async function addPendingTaskToSupabase(task) {
+    try {
+        const payload = {
+            task_name: task.taskName,
+            completed: task.completed || false
+        };
+        const inserted = await supabaseFetch('', { 
+            method: 'POST', 
+            body: JSON.stringify(payload),
+            headers: { Prefer: 'return=representation' }
+        }, SUPABASE_PENDING_REST);
+        return Array.isArray(inserted) ? inserted[0] : inserted;
+    } catch (err) {
+        console.warn('Supabase pending task insert failed', err);
+        return null;
+    }
+}
+
+async function updatePendingTaskInSupabase(supabaseId, updates) {
+    if (!supabaseId) return null;
+    try {
+        const payload = {};
+        if (updates.taskName !== undefined) payload.task_name = updates.taskName;
+        if (updates.completed !== undefined) payload.completed = updates.completed;
+        
+        if (Object.keys(payload).length === 0) return null;
+        
+        const updated = await supabaseFetch(`?id=eq.${supabaseId}`, { 
+            method: 'PATCH', 
+            body: JSON.stringify(payload) 
+        }, SUPABASE_PENDING_REST);
+        return Array.isArray(updated) ? updated[0] : updated;
+    } catch (err) {
+        console.warn('Supabase pending task update failed', err);
+        return null;
+    }
+}
+
+async function deletePendingTaskFromSupabase(supabaseId) {
+    if (!supabaseId) return false;
+    try {
+        await supabaseFetch(`?id=eq.${supabaseId}`, { method: 'DELETE' }, SUPABASE_PENDING_REST);
+        return true;
+    } catch (err) {
+        console.warn('Supabase pending task delete failed', err);
+        return false;
+    }
+}
+
 // TaskLoopDatabase — local storage with optional Supabase sync
 class TaskLoopDatabase {
     constructor() {
@@ -81,7 +187,9 @@ class TaskLoopDatabase {
             TASKS: 'tasks',
             CURRENT_TASK: 'currentTask',
             TASK_HISTORY: 'taskHistory',
-            SETTINGS: 'settings'
+            SETTINGS: 'settings',
+            STREAKS: 'streaks',
+            PENDING_TASKS: 'pendingTasks'
         };
         // Check if chrome.storage is available (extension context)
         this.isChromeExtension = typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local;
@@ -387,6 +495,234 @@ class TaskLoopDatabase {
             return `${hours}h`;
         } else {
             return `${hours}h ${mins}m`;
+        }
+    }
+
+    // Streaks Management
+    async getStreaks() {
+        try {
+            const streaks = await this.getFromStorage(this.storageKeys.STREAKS);
+            return streaks || [];
+        } catch (error) {
+            console.error('Error getting streaks:', error);
+            return [];
+        }
+    }
+
+    async saveStreaks(streaks) {
+        try {
+            await this.setToStorage(this.storageKeys.STREAKS, streaks);
+            return true;
+        } catch (error) {
+            console.error('Error saving streaks:', error);
+            return false;
+        }
+    }
+
+    async addStreak(streak) {
+        try {
+            const streaks = await this.getStreaks();
+            const newStreak = {
+                id: this.generateId(),
+                taskName: streak.taskName,
+                currentStreak: 0,
+                lastCompletedDate: null,
+                createdAt: Date.now(),
+                ...streak
+            };
+
+            streaks.push(newStreak);
+            await this.saveStreaks(streaks);
+
+            // Sync to Supabase
+            const remote = await addStreakToSupabase(newStreak).catch(() => null);
+            if (remote && remote.id !== undefined) {
+                newStreak.supabaseId = remote.id;
+                await this.saveStreaks(streaks);
+            }
+
+            return newStreak;
+        } catch (error) {
+            console.error('Error adding streak:', error);
+            return null;
+        }
+    }
+
+    async updateStreak(streakId, updates) {
+        try {
+            const streaks = await this.getStreaks();
+            const idx = streaks.findIndex(s => s.id === streakId);
+            if (idx === -1) throw new Error('Streak not found');
+
+            streaks[idx] = { ...streaks[idx], ...updates };
+            await this.saveStreaks(streaks);
+
+            const supabaseId = streaks[idx].supabaseId;
+            if (supabaseId) {
+                await updateStreakInSupabase(supabaseId, updates).catch(() => null);
+            }
+
+            return streaks[idx];
+        } catch (error) {
+            console.error('Error updating streak:', error);
+            return null;
+        }
+    }
+
+    async deleteStreak(streakId) {
+        try {
+            const streaks = await this.getStreaks();
+            const streak = streaks.find(s => s.id === streakId);
+            if (!streak) return false;
+
+            if (streak.supabaseId) {
+                await deleteStreakFromSupabase(streak.supabaseId).catch(() => null);
+            }
+
+            const filtered = streaks.filter(s => s.id !== streakId);
+            await this.saveStreaks(filtered);
+            return true;
+        } catch (error) {
+            console.error('Error deleting streak:', error);
+            return false;
+        }
+    }
+
+    async completeStreakToday(streakId) {
+        try {
+            const streaks = await this.getStreaks();
+            const streak = streaks.find(s => s.id === streakId);
+            if (!streak) throw new Error('Streak not found');
+
+            const today = this.getTodayDateString();
+            
+            // Check if already completed today
+            if (streak.lastCompletedDate === today) {
+                return { success: false, message: 'Already completed today' };
+            }
+
+            // Check if streak should continue or reset
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayString = this.formatDateString(yesterday);
+
+            let newStreak = streak.currentStreak;
+            if (streak.lastCompletedDate === yesterdayString) {
+                // Continue streak
+                newStreak = streak.currentStreak + 1;
+            } else if (streak.lastCompletedDate === null || streak.lastCompletedDate < yesterdayString) {
+                // Reset streak (missed a day)
+                newStreak = 1;
+            }
+
+            await this.updateStreak(streakId, {
+                currentStreak: newStreak,
+                lastCompletedDate: today
+            });
+
+            return { success: true, streak: newStreak };
+        } catch (error) {
+            console.error('Error completing streak:', error);
+            return { success: false, message: error.message };
+        }
+    }
+
+    // Pending Tasks Management
+    async getPendingTasks() {
+        try {
+            const tasks = await this.getFromStorage(this.storageKeys.PENDING_TASKS);
+            return tasks || [];
+        } catch (error) {
+            console.error('Error getting pending tasks:', error);
+            return [];
+        }
+    }
+
+    async savePendingTasks(tasks) {
+        try {
+            await this.setToStorage(this.storageKeys.PENDING_TASKS, tasks);
+            return true;
+        } catch (error) {
+            console.error('Error saving pending tasks:', error);
+            return false;
+        }
+    }
+
+    async addPendingTask(task) {
+        try {
+            const tasks = await this.getPendingTasks();
+            const newTask = {
+                id: this.generateId(),
+                taskName: task.taskName,
+                completed: false,
+                createdAt: Date.now(),
+                ...task
+            };
+
+            tasks.push(newTask);
+            await this.savePendingTasks(tasks);
+
+            // Sync to Supabase
+            const remote = await addPendingTaskToSupabase(newTask).catch(() => null);
+            if (remote && remote.id !== undefined) {
+                newTask.supabaseId = remote.id;
+                await this.savePendingTasks(tasks);
+            }
+
+            return newTask;
+        } catch (error) {
+            console.error('Error adding pending task:', error);
+            return null;
+        }
+    }
+
+    async updatePendingTask(taskId, updates) {
+        try {
+            const tasks = await this.getPendingTasks();
+            const idx = tasks.findIndex(t => t.id === taskId);
+            if (idx === -1) throw new Error('Pending task not found');
+
+            tasks[idx] = { ...tasks[idx], ...updates };
+            await this.savePendingTasks(tasks);
+
+            const supabaseId = tasks[idx].supabaseId;
+            if (supabaseId) {
+                await updatePendingTaskInSupabase(supabaseId, updates).catch(() => null);
+            }
+
+            return tasks[idx];
+        } catch (error) {
+            console.error('Error updating pending task:', error);
+            return null;
+        }
+    }
+
+    async deletePendingTask(taskId) {
+        try {
+            const tasks = await this.getPendingTasks();
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return false;
+
+            if (task.supabaseId) {
+                await deletePendingTaskFromSupabase(task.supabaseId).catch(() => null);
+            }
+
+            const filtered = tasks.filter(t => t.id !== taskId);
+            await this.savePendingTasks(filtered);
+            return true;
+        } catch (error) {
+            console.error('Error deleting pending task:', error);
+            return false;
+        }
+    }
+
+    async completePendingTask(taskId) {
+        try {
+            await this.updatePendingTask(taskId, { completed: true });
+            return true;
+        } catch (error) {
+            console.error('Error completing pending task:', error);
+            return false;
         }
     }
 

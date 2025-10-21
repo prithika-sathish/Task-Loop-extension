@@ -67,6 +67,52 @@
             </form>
         </div>
 
+        <!-- Streaks Section -->
+        <div id="streaksSection" class="streaks-section">
+            <div class="section-header">
+                <h2>Daily Streaks 🔥</h2>
+            </div>
+            
+            <form id="addStreakForm" class="streak-form">
+                <div class="form-row">
+                    <input type="text" id="streakTaskName" placeholder="e.g., Morning Exercise" required>
+                    <button type="submit" class="btn btn-primary">Add Streak</button>
+                </div>
+            </form>
+            
+            <div id="streaksList" class="streaks-list">
+                <!-- Streaks will be dynamically populated -->
+            </div>
+            
+            <div id="streaksEmptyState" class="empty-state hidden">
+                <p>No streak tasks yet</p>
+                <p class="subtitle">Add a daily task to start tracking your streak!</p>
+            </div>
+        </div>
+
+        <!-- Pending Tasks Section -->
+        <div id="pendingTasksSection" class="pending-tasks-section">
+            <div class="section-header">
+                <h2>Pending Tasks 📋</h2>
+            </div>
+            
+            <form id="addPendingTaskForm" class="pending-task-form">
+                <div class="form-row">
+                    <input type="text" id="pendingTaskName" placeholder="e.g., Buy groceries" required>
+                    <button type="submit" class="btn btn-primary">Add Task</button>
+                </div>
+            </form>
+            
+            <div id="pendingTasksList" class="pending-tasks-list">
+                <!-- Pending tasks will be dynamically populated -->
+            </div>
+            
+            <div id="pendingTasksEmptyState" class="empty-state hidden">
+                <p>No pending tasks</p>
+                <p class="subtitle">Add tasks that need to be done!</p>
+            </div>
+        </div>
+
         <!-- Today's Tasks -->
         <div id="tasksSection" class="tasks-section">
             <div class="section-header">

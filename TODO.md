@@ -1,145 +1,58 @@
-# TaskLoop Chrome Extension - Development Plan
+# TaskLoop Implementation Progress
 
-## ✅ Completed Tasks
+## Current Task: Add Streaks and Pending Tasks Sections ✅
 
-### Core Structure
-- [x] Created manifest.json with proper permissions and configuration
-- [x] Built popup.html with comprehensive UI layout
-- [x] Designed popup.css with modern, responsive styling
-- [x] Developed background.js service worker for timer management
-- [x] Implemented popup.js for UI interactions and task management
-- [x] Created options.html for settings page
-- [x] Styled options.css for settings interface
-- [x] Built options.js for settings functionality
-- [x] Developed database.js utility for data management
-- [x] Created comprehensive README.md with installation instructions
-- [x] Built create-icons.html for generating extension icons
-- [x] Created test-extension.html with comprehensive testing guide
+### Steps Completed:
+- [x] Update `scripts/database.js` - Add Streaks and PendingTasks methods
+- [x] Update `popup.html` - Add Streaks and Pending Tasks sections
+- [x] Update `scripts/popup.js` - Add logic for new sections
+- [x] Update `styles/popup.css` - Add styling for new sections
+- [x] Add sound notifications for task completion and streak completion
+- [ ] Test all functionality
+- [ ] Verify Supabase sync
 
-### Key Features Implemented
-- [x] Task scheduling with name, duration, and optional start time
-- [x] Real-time countdown timers with badge updates
-- [x] Local storage using Chrome Storage API
-- [x] Task history and calendar view
-- [x] Settings page with customization options
-- [x] Export/import functionality for data backup
-- [x] Statistics and productivity tracking
-- [x] Color-coded task status system
-- [x] Badge display with time and task abbreviation
+### Implementation Summary:
 
-## 🔄 Remaining Tasks
+**Streaks Feature:**
+- Users can add daily recurring tasks
+- Tracks consecutive days completed (streak counter)
+- Visual indicator when completed today (green badge)
+- Streak resets if a day is missed
+- Full CRUD operations (Create, Read, Update, Delete)
+- Syncs with Supabase Streaks table
+- **🔊 Plays notification sound when streak is completed**
 
-### 1. Icon Creation (High Priority)
-- [ ] Create icon16.png (16x16 pixels)
-- [ ] Create icon32.png (32x32 pixels)  
-- [ ] Create icon48.png (48x48 pixels)
-- [ ] Create icon128.png (128x128 pixels)
-- [ ] Design should include clock/timer theme with blue (#2563eb) primary color
+**Pending Tasks Feature:**
+- Users can add general tasks not tied to specific dates
+- Simple task list with completion tracking
+- Tasks are removed from view when marked complete
+- Full CRUD operations (Create, Read, Update, Delete)
+- Syncs with Supabase PendingTasks table
 
-### 2. Testing & Bug Fixes (High Priority)
-- [ ] Test extension loading in Chrome developer mode
-- [ ] Verify all popup functionality works correctly
-- [ ] Test task creation, editing, and deletion
-- [ ] Validate timer functionality and badge updates
-- [ ] Test settings page and data persistence
-- [ ] Verify export/import functionality
-- [ ] Test calendar view and navigation
-- [ ] Check responsive design on different screen sizes
+**Sound Notifications:**
+- **🔊 Plays notif-sound.mp3 when task timer reaches zero**
+- **🔊 Plays notif-sound.mp3 when user manually completes a task**
+- **🔊 Plays notif-sound.mp3 when user completes a streak**
+- Sound resets to beginning for each play
+- Graceful error handling if sound fails to play
 
-### 3. Enhanced Features (Medium Priority)
-- [ ] Add notification support when tasks complete
-- [ ] Implement 5-minute warning notifications
-- [ ] Add sound notifications (optional)
-- [ ] Create keyboard shortcuts for common actions
-- [ ] Add drag-and-drop task reordering
-- [ ] Implement task templates for common activities
+**UI/UX Enhancements:**
+- Streaks section with fire emoji 🔥 and orange theme
+- Pending tasks section with clipboard emoji 📋
+- Responsive forms with inline add buttons
+- Visual feedback for completed items
+- Consistent styling with existing TaskLoop design
 
-### 4. UI/UX Improvements (Medium Priority)
-- [ ] Add loading states for async operations
-- [ ] Implement smooth animations and transitions
-- [ ] Add confirmation dialogs for destructive actions
-- [ ] Improve error handling and user feedback
-- [ ] Add tooltips for better user guidance
-- [ ] Optimize for accessibility (ARIA labels, keyboard navigation)
+### Files Modified:
+1. **scripts/database.js** - Added Supabase endpoints and CRUD methods for Streaks and PendingTasks
+2. **popup.html** - Added HTML structure for both new sections
+3. **scripts/popup.js** - Added all logic, rendering, and sound notification functionality
+4. **styles/popup.css** - Added comprehensive styling for both sections
 
-### 5. Advanced Features (Low Priority)
-- [ ] Add task categories and filtering
-- [ ] Implement recurring tasks
-- [ ] Add time tracking analytics and charts
-- [ ] Create productivity insights and recommendations
-- [ ] Add integration with external calendar services
-- [ ] Implement team/shared task features
-
-### 6. Performance & Optimization (Low Priority)
-- [ ] Optimize storage usage and data cleanup
-- [ ] Implement efficient background script management
-- [ ] Add data compression for large datasets
-- [ ] Optimize badge update frequency for battery life
-- [ ] Add offline functionality improvements
-
-## 🎯 Immediate Next Steps
-
-1. **Create Icon Files**: The extension needs proper icon files to load correctly in Chrome
-2. **Test Basic Functionality**: Load the extension and test core features
-3. **Fix Any Loading Issues**: Address any manifest or permission issues
-4. **Validate Timer System**: Ensure background script and badge updates work properly
-5. **Test Data Persistence**: Verify tasks and settings save correctly
-
-## 📋 Testing Checklist
-
-### Basic Functionality
-- [ ] Extension loads without errors
-- [ ] Popup opens and displays correctly
-- [ ] Can add new tasks successfully
-- [ ] Task list displays properly
-- [ ] Settings page opens and functions
-- [ ] Data persists across browser restarts
-
-### Timer Features
-- [ ] Can start tasks and timer begins
-- [ ] Badge updates with correct time and task name
-- [ ] Pause/resume functionality works
-- [ ] Task completion updates history
-- [ ] Badge clears when no active task
-
-### Data Management
-- [ ] Tasks save and load correctly
-- [ ] History tracks completed tasks
-- [ ] Settings persist properly
-- [ ] Export creates valid JSON file
-- [ ] Import restores data correctly
-- [ ] Calendar view shows historical data
-
-### UI/UX
-- [ ] All buttons and controls respond properly
-- [ ] Forms validate input correctly
-- [ ] Error messages display appropriately
-- [ ] Responsive design works on different sizes
-- [ ] Color coding shows correct task status
-
-## 🚀 Deployment Preparation
-
-### Before Publishing
-- [ ] Complete all high-priority tasks
-- [ ] Perform comprehensive testing
-- [ ] Create proper icon set
-- [ ] Write detailed user documentation
-- [ ] Prepare Chrome Web Store listing materials
-- [ ] Test on multiple Chrome versions
-- [ ] Verify all permissions are necessary and documented
-
-### Chrome Web Store Requirements
-- [ ] High-quality icons (128x128 for store)
-- [ ] Screenshots of extension in use
-- [ ] Detailed description and feature list
-- [ ] Privacy policy (if collecting any data)
-- [ ] Proper categorization and keywords
-- [ ] Version numbering and changelog
-
-## 📝 Notes
-
-- All core functionality has been implemented in the code
-- The extension uses modern Chrome Extension Manifest V3
-- Local storage only - no external servers required
-- Designed for minimal battery impact with efficient timers
-- Follows Chrome extension best practices for security and performance
+### Next Steps:
+1. Test the extension in Chrome
+2. Verify Supabase sync for both new features
+3. Test streak increment logic across multiple days
+4. Test pending task completion and deletion
+5. Verify data persistence across browser sessions
+6. Test sound notifications in different scenarios
